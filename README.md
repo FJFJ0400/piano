@@ -1,3 +1,4 @@
+ HEAD
 # 🎹 PianoAI Coach
 
 AI 기반 피아노 연주 분석 및 비교 도구
@@ -93,3 +94,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능
 - Firefox 75+
 - Safari 13+
 - Edge 80+ 
+
+# piano
+PianoAI Coach: 웹 기반 AI 피아노 연습 도구 (HTML5, CSS3, JS, Web Audio API, Tone.js, Claude API 연동)
+ 8fb003cc1fe6d00fe0856912c6331b371ad6a13b

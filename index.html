@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎹 PianoAI Coach - AI 피아노 연습 도구</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-piano"></i>
+                <h1>PianoAI Coach</h1>
+            </div>
+            <p class="subtitle">AI 기반 피아노 연주 분석 및 비교 도구</p>
+        </header>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            <!-- 파일 업로드 섹션 -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>음원 또는 동영상 파일 업로드</h3>
+                        <p>MP3, WAV, MP4 등 다양한 형식을 지원합니다</p>
+                        <button class="upload-btn" id="uploadBtn">
+                            <i class="fas fa-folder-open"></i>
+                            파일 선택
+                        </button>
+                        <input type="file" id="fileInput" accept="audio/*,video/*" hidden>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 분석 결과 섹션 -->
+            <section class="analysis-section" id="analysisSection" style="display: none;">
+                <div class="analysis-header">
+                    <h2><i class="fas fa-chart-line"></i> AI 분석 결과</h2>
+                    <div class="file-info" id="fileInfo"></div>
+                </div>
+                
+                <div class="analysis-grid">
+                    <!-- 원본 분석 -->
+                    <div class="analysis-card">
+                        <h3><i class="fas fa-music"></i> 원본 분석</h3>
+                        <div class="analysis-content" id="originalAnalysis">
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>분석 중...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 연주 녹음 -->
+                    <div class="analysis-card">
+                        <h3><i class="fas fa-microphone"></i> 연주 녹음</h3>
+                        <div class="recording-controls">
+                            <button class="record-btn" id="recordBtn">
+                                <i class="fas fa-microphone"></i>
+                                녹음 시작
+                            </button>
+                            <button class="stop-btn" id="stopBtn" disabled>
+                                <i class="fas fa-stop"></i>
+                                녹음 중지
+                            </button>
+                        </div>
+                        <div class="recording-status" id="recordingStatus"></div>
+                        <div class="analysis-content" id="recordingAnalysis" style="display: none;">
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>분석 중...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 비교 결과 -->
+                <div class="comparison-section" id="comparisonSection" style="display: none;">
+                    <h3><i class="fas fa-balance-scale"></i> AI 비교 분석</h3>
+                    <div class="comparison-content" id="comparisonContent">
+                        <div class="score-card">
+                            <div class="score-circle">
+                                <span class="score-number" id="scoreNumber">0</span>
+                                <span class="score-label">점수</span>
+                            </div>
+                            <div class="score-details">
+                                <div class="score-item">
+                                    <span class="score-label">음정 정확도</span>
+                                    <div class="score-bar">
+                                        <div class="score-fill" id="pitchScore" style="width: 0%"></div>
+                                    </div>
+                                    <span class="score-value" id="pitchValue">0%</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-label">리듬 정확도</span>
+                                    <div class="score-bar">
+                                        <div class="score-fill" id="rhythmScore" style="width: 0%"></div>
+                                    </div>
+                                    <span class="score-value" id="rhythmValue">0%</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-label">음색 유사도</span>
+                                    <div class="score-bar">
+                                        <div class="score-fill" id="timbreScore" style="width: 0%"></div>
+                                    </div>
+                                    <span class="score-value" id="timbreValue">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feedback-card">
+                            <h4><i class="fas fa-comments"></i> AI 피드백</h4>
+                            <div class="feedback-content" id="feedbackContent">
+                                <p>연주를 녹음하면 AI가 자세한 피드백을 제공합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="footer">
+            <p>&copy; 2024 PianoAI Coach. AI 기반 피아노 연습 도구</p>
+        </footer>
+    </div>
+
+    <!-- 스크립트 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/audio-analyzer.js"></script>
+    <script src="js/ai-comparison.js"></script>
+    <script>
+        // 메인 애플리케이션 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎹 PianoAI Coach 초기화 중...');
+            
+            // 전역 변수
+            let audioAnalyzer = null;
+            let aiComparison = null;
+            let isRecording = false;
+            let mediaRecorder = null;
+            let recordedChunks = [];
+
+            // DOM 요소들
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const analysisSection = document.getElementById('analysisSection');
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const recordingStatus = document.getElementById('recordingStatus');
+
+            // 파일 업로드 이벤트
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+
+            // 녹음 이벤트
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+
+            // 파일 업로드 처리
+            async function handleFileUpload(file) {
+                try {
+                    console.log('파일 업로드:', file.name);
+                    
+                    // 파일 정보 표시
+                    document.getElementById('fileInfo').innerHTML = `
+                        <div class="file-details">
+                            <i class="fas fa-file-audio"></i>
+                            <span>${file.name}</span>
+                            <span class="file-size">${formatFileSize(file.size)}</span>
+                        </div>
+                    `;
+
+                    // 분석 섹션 표시
+                    analysisSection.style.display = 'block';
+                    
+                    // 오디오 분석기 초기화
+                    audioAnalyzer = new AudioAnalyzer();
+                    await audioAnalyzer.initialize();
+                    
+                    // 파일 분석
+                    const analysis = await audioAnalyzer.analyzeFile(file);
+                    displayOriginalAnalysis(analysis);
+                    
+                    // AI 비교 분석기 초기화
+                    aiComparison = new AIComparison();
+                    
+                } catch (error) {
+                    console.error('파일 업로드 오류:', error);
+                    showError('파일 업로드 중 오류가 발생했습니다.');
+                }
+            }
+
+            // 원본 분석 결과 표시
+            function displayOriginalAnalysis(analysis) {
+                const originalAnalysis = document.getElementById('originalAnalysis');
+                originalAnalysis.innerHTML = `
+                    <div class="analysis-data">
+                        <div class="data-item">
+                            <span class="label">템포</span>
+                            <span class="value">${analysis.tempo || 'N/A'} BPM</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">키</span>
+                            <span class="value">${analysis.key || 'N/A'}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">길이</span>
+                            <span class="value">${formatDuration(analysis.duration)}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">주파수 범위</span>
+                            <span class="value">${analysis.frequencyRange || 'N/A'}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 녹음 시작
+            async function startRecording() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    recordedChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(recordedChunks, { type: 'audio/wav' });
+                        await handleRecordingAnalysis(audioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    recordBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    recordingStatus.innerHTML = '<i class="fas fa-circle text-red"></i> 녹음 중...';
+                    
+                } catch (error) {
+                    console.error('녹음 시작 오류:', error);
+                    showError('마이크 접근 권한이 필요합니다.');
+                }
+            }
+
+            // 녹음 중지
+            function stopRecording() {
+                if (mediaRecorder && isRecording) {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    
+                    isRecording = false;
+                    recordBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    recordingStatus.innerHTML = '<i class="fas fa-check text-green"></i> 녹음 완료';
+                }
+            }
+
+            // 녹음 분석 처리
+            async function handleRecordingAnalysis(audioBlob) {
+                try {
+                    const recordingAnalysis = document.getElementById('recordingAnalysis');
+                    recordingAnalysis.style.display = 'block';
+                    recordingAnalysis.innerHTML = `
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>연주 분석 중...</p>
+                        </div>
+                    `;
+
+                    // 녹음 파일 분석
+                    const recordingFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+                    const recordingAnalysisResult = await audioAnalyzer.analyzeFile(recordingFile);
+                    
+                    // AI 비교 분석
+                    const comparison = await aiComparison.compare(recordingAnalysisResult);
+                    displayComparisonResults(comparison);
+                    
+                } catch (error) {
+                    console.error('녹음 분석 오류:', error);
+                    showError('녹음 분석 중 오류가 발생했습니다.');
+                }
+            }
+
+            // 비교 결과 표시
+            function displayComparisonResults(comparison) {
+                const comparisonSection = document.getElementById('comparisonSection');
+                const scoreNumber = document.getElementById('scoreNumber');
+                const pitchScore = document.getElementById('pitchScore');
+                const rhythmScore = document.getElementById('rhythmScore');
+                const timbreScore = document.getElementById('timbreScore');
+                const pitchValue = document.getElementById('pitchValue');
+                const rhythmValue = document.getElementById('rhythmValue');
+                const timbreValue = document.getElementById('timbreValue');
+                const feedbackContent = document.getElementById('feedbackContent');
+
+                // 점수 애니메이션
+                animateScore(scoreNumber, comparison.totalScore);
+                animateScoreBar(pitchScore, pitchValue, comparison.pitchAccuracy);
+                animateScoreBar(rhythmScore, rhythmValue, comparison.rhythmAccuracy);
+                animateScoreBar(timbreScore, timbreValue, comparison.timbreSimilarity);
+
+                // 피드백 표시
+                feedbackContent.innerHTML = `
+                    <div class="feedback-item">
+                        <h5>전체 평가</h5>
+                        <p>${comparison.feedback.overall}</p>
+                    </div>
+                    <div class="feedback-item">
+                        <h5>개선점</h5>
+                        <p>${comparison.feedback.improvements}</p>
+                    </div>
+                    <div class="feedback-item">
+                        <h5>칭찬할 점</h5>
+                        <p>${comparison.feedback.strengths}</p>
+                    </div>
+                `;
+
+                comparisonSection.style.display = 'block';
+            }
+
+            // 점수 애니메이션
+            function animateScore(element, targetScore) {
+                let currentScore = 0;
+                const increment = targetScore / 50;
+                const timer = setInterval(() => {
+                    currentScore += increment;
+                    if (currentScore >= targetScore) {
+                        currentScore = targetScore;
+                        clearInterval(timer);
+                    }
+                    element.textContent = Math.round(currentScore);
+                }, 20);
+            }
+
+            // 점수 바 애니메이션
+            function animateScoreBar(barElement, valueElement, targetPercentage) {
+                let currentWidth = 0;
+                const increment = targetPercentage / 50;
+                const timer = setInterval(() => {
+                    currentWidth += increment;
+                    if (currentWidth >= targetPercentage) {
+                        currentWidth = targetPercentage;
+                        clearInterval(timer);
+                    }
+                    barElement.style.width = currentWidth + '%';
+                    valueElement.textContent = Math.round(currentWidth) + '%';
+                }, 20);
+            }
+
+            // 유틸리티 함수들
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            function formatDuration(seconds) {
+                if (!seconds) return 'N/A';
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            function showError(message) {
+                // 에러 메시지 표시 로직
+                console.error(message);
+                alert(message);
+            }
+
+            console.log('🎹 PianoAI Coach 초기화 완료!');
+        });
+    </script>
+</body>
+</html> 

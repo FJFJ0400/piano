@@ -1,0 +1,25 @@
+{
+  "name": "piano-ai-coach",
+  "version": "1.0.0",
+  "description": "AI-powered piano practice and analysis tool",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "live-server --port=8080",
+    "build": "echo 'Building project...'",
+    "test": "echo 'Running tests...'"
+  },
+  "keywords": [
+    "piano",
+    "ai",
+    "music",
+    "audio-analysis",
+    "web-audio"
+  ],
+  "author": "PianoAI Team",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {}
+} 

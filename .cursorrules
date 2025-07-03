@@ -1,0 +1,30 @@
+# PianoAI Coach - Cursor AI Rules
+
+## 프로젝트 컨텍스트
+- 웹 기반 AI 피아노 연습 도구
+- HTML5, CSS3, Vanilla JavaScript 사용
+- Web Audio API, Tone.js 활용
+- 음원 분석 및 연주 비교 기능
+
+## 코딩 스타일
+- ES6+ 모던 JavaScript 사용
+- 클래스 기반 구조 선호
+- async/await 패턴 사용
+- 명확한 변수명과 함수명 사용
+
+## 파일 구조 규칙
+- HTML: index.html (메인 파일)
+- CSS: css/styles.css (스타일)
+- JS: js/ 폴더에 기능별 분리
+- 에셋: assets/ 폴더에 정리
+
+## 개발 우선순위
+1. 사용자 경험 최적화
+2. 오디오 처리 안정성
+3. 브라우저 호환성
+4. 성능 최적화
+
+## 금지사항
+- localStorage/sessionStorage 사용 금지 (Claude 환경 제약)
+- 복잡한 빌드 도구 사용 금지
+- 외부 API 의존성 최소화 
